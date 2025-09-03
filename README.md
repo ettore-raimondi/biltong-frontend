@@ -1,2 +1,2 @@
-# budget-frontend
+# biltong-frontend
 cs50 final
