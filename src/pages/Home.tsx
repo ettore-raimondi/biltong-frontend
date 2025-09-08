@@ -38,7 +38,6 @@ function Home() {
           onHide={() => setShowCreateBatchDialog(false)}
         />
         <div className="h-full w-full mx-3">
-          <h1 className="mt-0">Welcome to the Biltong App</h1>
           {/** Main content area */}
           <Outlet />
         </div>
