@@ -26,9 +26,6 @@ export function Sidebar({
   return (
     <div className="full-height flex">
       <Menu model={items} className="w-full md:w-15rem h-screen" />
-      <div className="flex flex-column align-items-center justify-content-center h-full w-full p-15">
-        <h1>Welcome to the Biltong App</h1>
-      </div>
     </div>
   );
 }

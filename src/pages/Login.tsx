@@ -58,8 +58,14 @@ function Login() {
           <label htmlFor="password">Password</label>
         </FloatLabel>
         <Button
-          label="Register"
+          label="Login"
           onClick={() => loginMutation.mutate({ email, password })}
+        />
+
+        <Button
+          label="No account? Register here"
+          link
+          onClick={() => (window.location.href = "/register")}
         />
       </div>
     </>
