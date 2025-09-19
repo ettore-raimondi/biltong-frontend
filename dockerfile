@@ -1,5 +1,5 @@
 # Stage 1: Build the application
-FROM node:22-alpine as builder
+FROM node:20-alpine as builder
 
 WORKDIR /app
 
@@ -11,7 +11,7 @@ COPY . .
 RUN npm run build
 
 # Stage 2: Serve the app with a static server
-FROM node:22-alpine AS runner
+FROM node:20-alpine AS runner
 
 WORKDIR /app
 
