@@ -16,7 +16,7 @@ function Home() {
     queryFn: async () => {
       const response = await apiClient.get("/batches");
       // Sets all batches
-      setBatches(response.data);
+      setBatches(response.data.filter((batch: Batch) => batch.deletedAt));
       setActiveBatch(
         response.data.find((batch: Batch) => !batch.deletedAt) || null
       );
@@ -26,12 +26,13 @@ function Home() {
 
   return (
     <div className="flex h-screen">
-      <DashboardContext.Provider value={{ batches, activeBatch }}>
+      <DashboardContext.Provider
+        value={{ batches, activeBatch, refetchBatches }}
+      >
         <Sidebar handleCreateBatch={() => setShowCreateBatchDialog(true)} />
         <CreateBatchDialog
           visible={showCreateBatchDialog}
-          onBatchCreated={(batch) => {
-            console.log("Batch created:", batch);
+          onBatchCreated={() => {
             setShowCreateBatchDialog(false);
             refetchBatches();
           }}

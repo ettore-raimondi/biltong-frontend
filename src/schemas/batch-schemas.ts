@@ -35,3 +35,11 @@ export const createBatchSchema = batchSchema
 export type Batch = z.infer<typeof batchSchema>;
 
 export type CreateBatchInput = z.infer<typeof createBatchSchema>;
+
+export const DryingProfile = {
+  WET: "WET",
+  MEDIUM: "MEDIUM",
+  DRY: "DRY",
+} as const;
+
+export type DryingProfile = (typeof DryingProfile)[keyof typeof DryingProfile];

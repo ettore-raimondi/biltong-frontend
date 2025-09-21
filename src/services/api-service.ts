@@ -19,6 +19,15 @@ apiClient.interceptors.request.use(
     return config;
   },
   (error) => {
+    return Promise.reject(error);
+  }
+);
+
+apiClient.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
     // Handle request errors
     if (error.response?.status === 401) {
       // Handle unauthorized errors
@@ -28,13 +37,5 @@ apiClient.interceptors.request.use(
     return Promise.reject(error);
   }
 );
-
-// apiClient.interceptors.request.use((config) => {
-//   const token = localStorage.getItem("token");
-//   if (token) {
-//     config.headers.Authorization = `Bearer ${token}`;
-//   }
-//   return config;
-// });
 
 export default apiClient;

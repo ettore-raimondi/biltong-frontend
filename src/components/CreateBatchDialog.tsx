@@ -12,6 +12,12 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import apiClient from "../services/api-service";
 import { useToast } from "../context/Toast";
+import { InputSwitch } from "primereact/inputswitch";
+import { Card } from "primereact/card";
+import {
+  DRYING_PROFILES,
+  type DryingProfileConfig,
+} from "../config/drying-profiles";
 
 export function CreateBatchDialog({
   visible,
@@ -37,6 +43,9 @@ export function CreateBatchDialog({
   const [name, setName] = useState<string>("");
   const [marinadeTime, setMarinadeTime] = useState<string>("");
   const [seasoning, setSeasoning] = useState<string>("");
+  const [customDryingParams, setCustomDryingParams] = useState<boolean>(false);
+  const [selectedProfile, setSelectedProfile] =
+    useState<DryingProfileConfig | null>(null);
 
   function setWeightAtIndex(index: number, value: number | null) {
     setWeight((prev) => {
@@ -75,6 +84,15 @@ export function CreateBatchDialog({
     } catch (error) {
       toast.show("error", `Failed to create batch. ${error}`);
     }
+  }
+
+  function handleSelectProfile(profile: DryingProfileConfig) {
+    // Set the drying parameters based on the selected profile
+    setTemperature(profile.temperature);
+    setHumidity(profile.humidity);
+    setAirflow(profile.airflow);
+    setWeightLoss(profile.targetWeightLoss);
+    setSelectedProfile(profile);
   }
 
   if (!visible) return null;
@@ -150,40 +168,82 @@ export function CreateBatchDialog({
           <Divider align="center">
             <span className="p-tag">Drying paramaters</span>
           </Divider>
-          <div className="card flex flex-wrap gap-3 p-fluid">
-            <div className="flex flex-column gap-2">
-              <label htmlFor="temperature">Temperature (C)</label>
-              <InputNumber
-                value={temperature}
-                onValueChange={(e) => setTemperature(e.value ?? null)}
-                prefix="&uarr; "
-                suffix="℃"
-                min={0}
-                max={40}
-              />
-              <small id="temperature-help">Temperature to keep</small>
-            </div>
-            <div className="flex flex-column gap-2">
-              <label htmlFor="air-flow">Air flow (m/s)</label>
-              <InputNumber
-                value={airflow ?? 0}
-                max={1}
-                onValueChange={(e) => setAirflow(e.value ?? null)}
-                suffix=" m/s"
-              />
-              <small id="air-flow-help">Number between 0.1 and 1</small>
-            </div>
-            <div className="flex flex-column gap-2">
-              <label htmlFor="moisture">Humidity (%)</label>
-              <InputNumber
-                value={humidity ?? 0}
-                max={100}
-                onValueChange={(e) => setHumidity(e.value ?? null)}
-                suffix="%"
-              />
-              <small id="moisture-help">high = mold, low = hard crust</small>
-            </div>
+          <div className="flex align-items-center mb-4">
+            <InputSwitch
+              checked={customDryingParams}
+              onChange={(e) => setCustomDryingParams(e.value)}
+            />
+            <span className="ml-2">Set custom drying parameters</span>
           </div>
+          {!customDryingParams && (
+            <div className="flex flex-wrap gap-3 p-fluid">
+              {DRYING_PROFILES.map((profile) => (
+                <Card
+                  title={profile.name}
+                  subTitle={profile.subtitle}
+                  className={`profile-card w-full ${
+                    selectedProfile?.id === profile.id ? "selected" : ""
+                  }`}
+                  onClick={() => handleSelectProfile(profile)}
+                >
+                  <p className="m-0">
+                    <b>Character:</b> {profile.characteristics}
+                  </p>
+                  <p className="m-0 mt-2">
+                    <b>Details:</b> {profile.details}
+                  </p>
+                  <p className="m-0 mt-2">
+                    <b>Temperature:</b> {profile.temperature}℃
+                  </p>
+                  <p className="m-0 mt-2">
+                    <b>Humidity:</b> {profile.humidity}%
+                  </p>
+                  <p className="m-0 mt-2">
+                    <b>Air flow:</b> {profile.airflow} m/s
+                  </p>
+                  <p className="m-0 mt-2">
+                    <b>Target weight loss:</b> {profile.targetWeightLoss}%
+                  </p>
+                </Card>
+              ))}
+            </div>
+          )}
+          {customDryingParams && (
+            <div className="card flex flex-wrap gap-3 p-fluid">
+              <div className="flex flex-column gap-2">
+                <label htmlFor="temperature">Temperature (C)</label>
+                <InputNumber
+                  value={temperature}
+                  onValueChange={(e) => setTemperature(e.value ?? null)}
+                  prefix="&uarr; "
+                  suffix="℃"
+                  min={0}
+                  max={40}
+                />
+                <small id="temperature-help">Temperature to keep</small>
+              </div>
+              <div className="flex flex-column gap-2">
+                <label htmlFor="air-flow">Air flow (m/s)</label>
+                <InputNumber
+                  value={airflow ?? 0}
+                  max={1}
+                  onValueChange={(e) => setAirflow(e.value ?? null)}
+                  suffix=" m/s"
+                />
+                <small id="air-flow-help">Number between 0.1 and 1</small>
+              </div>
+              <div className="flex flex-column gap-2">
+                <label htmlFor="moisture">Humidity (%)</label>
+                <InputNumber
+                  value={humidity ?? 0}
+                  max={100}
+                  onValueChange={(e) => setHumidity(e.value ?? null)}
+                  suffix="%"
+                />
+                <small id="moisture-help">high = mold, low = hard crust</small>
+              </div>
+            </div>
+          )}
           <Divider align="center">
             <span className="p-tag">Meat weight</span>
           </Divider>
@@ -208,31 +268,37 @@ export function CreateBatchDialog({
               </div>
             ))}
           </div>
-          <Divider align="center">
-            <span className="p-tag">Weight loss target</span>
-          </Divider>
-          <p className="mt-5">
-            The box will dry your biltong until it reaches the target weight.
-            Meat contains about 75% water.
-            <ul>
-              <li>~40% loss = wet biltong,</li>
-              <li>~45–50% loss = classic biltong,</li>
-              <li>~55–60% loss = very dry biltong</li>
-              <li>~65%+ loss = biltong for long term storage</li>
-            </ul>
-          </p>
-          <div className="card flex flex-column md:flex-row gap-3">
-            <div className="flex flex-column gap-2 mt-2">
-              <label htmlFor="weight-loss">Weight loss %</label>
-              <InputNumber
-                value={weightLoss ?? 0}
-                max={75}
-                onValueChange={(e) => setWeightLoss(e.value ?? null)}
-                suffix="%"
-              />
-              <small id="weight-loss-help">Target weight loss percentage</small>
-            </div>
-          </div>
+          {customDryingParams && (
+            <>
+              <Divider align="center">
+                <span className="p-tag">Weight loss target</span>
+              </Divider>
+              <p className="mt-5">
+                The box will dry your biltong until it reaches the target
+                weight. Meat contains about 75% water.
+                <ul>
+                  <li>~40% loss = wet biltong,</li>
+                  <li>~45–50% loss = classic biltong,</li>
+                  <li>~55–60% loss = very dry biltong</li>
+                  <li>~65%+ loss = biltong for long term storage</li>
+                </ul>
+              </p>
+              <div className="card flex flex-column md:flex-row gap-3">
+                <div className="flex flex-column gap-2 mt-2">
+                  <label htmlFor="weight-loss">Weight loss %</label>
+                  <InputNumber
+                    value={weightLoss ?? 0}
+                    max={75}
+                    onValueChange={(e) => setWeightLoss(e.value ?? null)}
+                    suffix="%"
+                  />
+                  <small id="weight-loss-help">
+                    Target weight loss percentage
+                  </small>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </Dialog>
     </div>
