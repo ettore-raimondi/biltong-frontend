@@ -5,7 +5,6 @@ import apiClient from "../services/api-service";
 import { useEffect, useState } from "react";
 import { Card } from "primereact/card";
 import { Chart } from "primereact/chart";
-import type { BatchData } from "../schemas/batch-data.schema";
 import {
   getWeightLossOverTimeChartData,
   weightLossChartOptions,
@@ -16,51 +15,15 @@ import {
 } from "../graph-data/temp-and-humidity";
 import { Divider } from "primereact/divider";
 import { Panel } from "primereact/panel";
+import { useBatchMetrics } from "../hooks/useBatchMetrics";
 
 function BatchView() {
   const { batchId } = useParams();
   const [weightLossOverTimeChartData, setWeightLossOverTimeChartData] =
     useState({});
   const [tempHumidityChartData, setTempHumidityChartData] = useState({});
-  const [percentageComplete, setPercentageComplete] = useState<number | null>(
-    null
-  );
 
-  function calculateTotalCompletionPercentage(
-    batch: Batch | undefined,
-    batchMetrics: BatchData[]
-  ): number {
-    // Implementation for calculating total completion percentage
-    if (!batch || !batchMetrics.length) return 0;
-
-    const targetWeightLoss = batch.weightLoss;
-    const latestMetrics = batchMetrics[batchMetrics.length - 1];
-    if (!latestMetrics.weightMeasurements) return 0;
-
-    const meatPieceWeightLossPercentages =
-      latestMetrics.weightMeasurements?.map((wm, index) => {
-        const initialWeight = batch.meatPieces[index].initialWeight ?? 0;
-        const currentWeight = parseFloat(wm.weight.toFixed(2));
-        const weightLossPercentage =
-          ((initialWeight - currentWeight) / initialWeight) * 100;
-        return Math.min((weightLossPercentage / targetWeightLoss) * 100, 100);
-      });
-
-    // Return the average completion percentage across all meat pieces
-    const total = meatPieceWeightLossPercentages.reduce(
-      (acc, val) => acc + val,
-      0
-    );
-    return parseFloat(
-      (total / meatPieceWeightLossPercentages.length).toFixed(2)
-    );
-  }
-
-  const {
-    data: batch,
-    isLoading: batchLoading,
-    isSuccess: batchSuccess,
-  } = useQuery({
+  const { data: batch, isSuccess: batchSuccess } = useQuery({
     queryKey: ["batch", batchId],
     queryFn: async (): Promise<Batch> => {
       const response = await apiClient.get("/batches/" + batchId);
@@ -68,25 +31,22 @@ function BatchView() {
     },
   });
 
-  const { data: batchMetrics, isLoading: metricsLoading } = useQuery({
-    queryKey: ["batchMetrics", batchId],
-    queryFn: async (): Promise<BatchData[]> => {
-      const response = await apiClient.get(`/batches/${batchId}/data`);
-      return response.data;
-    },
-    enabled: batchSuccess && Boolean(batch.id),
-    refetchInterval: 2000,
-  });
+  // Use the custom hook for batch metrics and completion percentage
+  const { batchMetrics, percentageComplete } = useBatchMetrics(
+    parseInt(batchId || ""),
+    batch,
+    {
+      enabled: batchSuccess && Boolean(batch?.id),
+      refetchInterval: 2000,
+    }
+  );
 
   useEffect(() => {
     setWeightLossOverTimeChartData(
       getWeightLossOverTimeChartData(batchMetrics || [])
     );
     setTempHumidityChartData(getTempAndHumidityOverTime(batchMetrics || []));
-    setPercentageComplete(
-      calculateTotalCompletionPercentage(batch, batchMetrics || [])
-    );
-  }, [batchMetrics]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [batchMetrics]);
 
   return (
     <>

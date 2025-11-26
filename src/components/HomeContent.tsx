@@ -9,6 +9,7 @@ import { useMutation } from "@tanstack/react-query";
 import apiClient from "../services/api-service";
 import { useToast } from "../context/Toast";
 import { ConfirmPopup, confirmPopup } from "primereact/confirmpopup";
+import { useBatchMetrics } from "../hooks/useBatchMetrics";
 
 function HomeContent() {
   const navigate = useNavigate();
@@ -21,9 +22,21 @@ function HomeContent() {
     mutationFn: deleteBatch,
   });
 
-  if (!context) return <div>Error: context not found</div>;
+  if (!context) {
+    return <>Loading...</>;
+  }
   const { batches, activeBatch, refetchBatches, setShowCreateBatchDialog } =
     context;
+
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const { percentageComplete } = useBatchMetrics(
+    activeBatch?.id,
+    activeBatch ?? undefined,
+    {
+      enabled: Boolean(activeBatch?.id),
+      refetchInterval: 2000,
+    }
+  );
 
   function getTitle({ name, isLoading }: { name: string; isLoading: boolean }) {
     return (
@@ -122,13 +135,16 @@ function HomeContent() {
                       />
                     </div>
                   }
-                  title={getTitle({ name: activeBatch.name, isLoading: true })}
+                  title={getTitle({
+                    name: activeBatch.name,
+                    isLoading: percentageComplete !== 100,
+                  })}
                   key={activeBatch.id}
                 >
                   <div className="flex flex-column gap-4">
                     <p className="m-0">Click me to edit</p>
                     <ProgressBar
-                      value={25}
+                      value={percentageComplete ?? 0}
                       style={{ height: "1rem" }}
                     ></ProgressBar>
                   </div>
