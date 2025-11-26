@@ -26,7 +26,7 @@ export function Sidebar({
         {
           label: "Help",
           icon: "pi pi-fw pi-question",
-          command: () => console.log("Help"),
+          command: () => navigate(`/home/help`),
         },
         {
           label: "Logout",

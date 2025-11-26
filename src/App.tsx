@@ -6,6 +6,7 @@ import { useRef } from "react";
 import Home from "./pages/Home";
 import BatchView from "./components/BatchView";
 import HomeContent from "./components/HomeContent";
+import { Help } from "./pages/Help";
 
 function App() {
   const toast = useRef(null);
@@ -19,7 +20,7 @@ function App() {
         <Route path="/home" element={<Home />}>
           <Route index element={<HomeContent />} /> {/* default */}
           <Route path="view-batch/:batchId" element={<BatchView />} />
-          <Route path="help" element={<BatchView />} />
+          <Route path="help" element={<Help />} />
         </Route>
       </Routes>
     </>
