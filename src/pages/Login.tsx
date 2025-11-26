@@ -17,11 +17,21 @@ function Login() {
   const [password, setPassword] = useState("");
 
   const loginMutation = useMutation({
-    mutationFn: registerUser,
+    mutationFn: handleLogin,
   });
 
-  async function registerUser(user: LoginPayload) {
+  async function handleLogin(user: LoginPayload) {
     try {
+      if (!user.email) {
+        toast.show("warn", "Validation Error", "Email is required.");
+        return;
+      }
+
+      if (!user.password) {
+        toast.show("warn", "Validation Error", "Password is required.");
+        return;
+      }
+
       const loginResult = await apiClient.post("/auth/login", user);
       setAuthToken(loginResult.data.token);
       toast.show("success", "Logged In!", "You have successfully logged in.");
@@ -54,6 +64,9 @@ function Login() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            onKeyDown={(e) =>
+              e.key === "Enter" && loginMutation.mutate({ email, password })
+            }
           />
           <label htmlFor="password">Password</label>
         </FloatLabel>

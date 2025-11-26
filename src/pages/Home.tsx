@@ -27,7 +27,12 @@ function Home() {
   return (
     <div className="flex h-screen">
       <DashboardContext.Provider
-        value={{ batches, activeBatch, refetchBatches }}
+        value={{
+          batches,
+          activeBatch,
+          refetchBatches,
+          setShowCreateBatchDialog: (value) => setShowCreateBatchDialog(value),
+        }}
       >
         <Sidebar handleCreateBatch={() => setShowCreateBatchDialog(true)} />
         <CreateBatchDialog
@@ -38,7 +43,7 @@ function Home() {
           }}
           onHide={() => setShowCreateBatchDialog(false)}
         />
-        <div className="h-full w-full mx-3">
+        <div className="h-full w-full mx-3" style={{ overflowY: "auto" }}>
           {/** Main content area */}
           <Outlet />
         </div>

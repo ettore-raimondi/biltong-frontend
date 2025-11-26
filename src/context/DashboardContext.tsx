@@ -4,6 +4,7 @@ type DashboardContextType = {
   batches: Batch[];
   activeBatch: Batch | null;
   refetchBatches: () => void;
+  setShowCreateBatchDialog: (value: boolean) => void;
 };
 export const DashboardContext = createContext<DashboardContextType | null>(
   null

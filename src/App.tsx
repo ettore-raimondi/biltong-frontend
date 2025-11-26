@@ -4,7 +4,7 @@ import Login from "./pages/Login";
 import { Toast } from "primereact/toast";
 import { useRef } from "react";
 import Home from "./pages/Home";
-import ActiveBatch from "./components/ActiveBatch";
+import BatchView from "./components/BatchView";
 import HomeContent from "./components/HomeContent";
 
 function App() {
@@ -18,7 +18,8 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/home" element={<Home />}>
           <Route index element={<HomeContent />} /> {/* default */}
-          <Route path="active-batch" element={<ActiveBatch />} />
+          <Route path="view-batch/:batchId" element={<BatchView />} />
+          <Route path="help" element={<BatchView />} />
         </Route>
       </Routes>
     </>

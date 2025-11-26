@@ -22,7 +22,8 @@ function HomeContent() {
   });
 
   if (!context) return <div>Error: context not found</div>;
-  const { batches, activeBatch, refetchBatches } = context;
+  const { batches, activeBatch, refetchBatches, setShowCreateBatchDialog } =
+    context;
 
   function getTitle({ name, isLoading }: { name: string; isLoading: boolean }) {
     return (
@@ -86,71 +87,102 @@ function HomeContent() {
 
   return (
     <>
-      <p>Running batch</p>
-      <div className="flex-grid">
-        <ConfirmPopup />
-        {activeBatch && (
-          <Card
-            className="item batch-card"
-            footer={
-              <div className="flex gap-2">
-                <Button
-                  label="View"
-                  onClick={() => navigate("active-batch")}
-                  size="small"
-                  icon="pi pi-eye"
-                />
-                <Button
-                  label="Stop"
-                  size="small"
-                  severity="danger"
-                  icon="pi pi-times"
-                  onClick={(event) => confirmDeactivate(event)}
-                />
-              </div>
-            }
-            title={getTitle({ name: activeBatch.name, isLoading: true })}
-            key={activeBatch.id}
-          >
-            <div className="flex flex-column gap-4">
-              <p className="m-0">Click me to edit</p>
-              <ProgressBar value={25} style={{ height: "1rem" }}></ProgressBar>
-            </div>
+      <div>
+        {!activeBatch ? (
+          <Card className="m-5 p-5 text-center">
+            <h2>No Batches Running</h2>
+            <p>Please create a new batch to get started.</p>
+            <Button
+              label="Create Batch"
+              onClick={() => setShowCreateBatchDialog(true)}
+            />
           </Card>
+        ) : (
+          <>
+            <p>Running batch</p>
+            <div className="flex-grid m-5">
+              <ConfirmPopup />
+              {activeBatch && (
+                <Card
+                  className="item batch-card"
+                  footer={
+                    <div className="flex gap-2">
+                      <Button
+                        label="View"
+                        onClick={() => navigate(`view-batch/${activeBatch.id}`)}
+                        size="small"
+                        icon="pi pi-eye"
+                      />
+                      <Button
+                        label="Stop"
+                        size="small"
+                        severity="danger"
+                        icon="pi pi-times"
+                        onClick={(event) => confirmDeactivate(event)}
+                      />
+                    </div>
+                  }
+                  title={getTitle({ name: activeBatch.name, isLoading: true })}
+                  key={activeBatch.id}
+                >
+                  <div className="flex flex-column gap-4">
+                    <p className="m-0">Click me to edit</p>
+                    <ProgressBar
+                      value={25}
+                      style={{ height: "1rem" }}
+                    ></ProgressBar>
+                  </div>
+                </Card>
+              )}
+            </div>
+          </>
         )}
-      </div>
 
-      <p>All Batches</p>
-      <div className="flex-grid">
-        {(batches ?? []).map((batch) => (
-          <Card
-            className="item batch-card"
-            footer={
-              <div className="flex gap-2">
-                <Button
-                  label="View"
-                  onClick={() => navigate("active-batch")}
-                  size="small"
-                  icon="pi pi-eye"
-                />
-                <Button
-                  label="Delete"
-                  size="small"
-                  severity="danger"
-                  icon="pi pi-times"
-                  onClick={(event) => confirmDelete(event, batch.id)}
-                />
-              </div>
-            }
-            title={batch.name}
-            key={batch.id}
-          >
-            <div className="flex flex-column gap-4">
-              <p className="m-0">Click me to edit</p>
-              <ProgressBar value={100} style={{ height: "1rem" }}></ProgressBar>
+        {!batches.length ? (
+          <div className="m-5 p-5 text-center">
+            <h2>No Past Batches</h2>
+            <p>You have no past batches. Create a new batch to get started.</p>
+            <p>Once you finish or stop a batch, it will appear here.</p>
+          </div>
+        ) : (
+          <>
+            <p>Batch history</p>
+            <div className="flex-grid m-5">
+              {batches.map((batch) => (
+                <Card
+                  className="item batch-card"
+                  footer={
+                    <div className="flex gap-2">
+                      <Button
+                        label="View"
+                        onClick={() => navigate(`view-batch/${batch.id}`)}
+                        size="small"
+                        icon="pi pi-eye"
+                      />
+                      <Button
+                        label="Delete"
+                        size="small"
+                        severity="danger"
+                        icon="pi pi-times"
+                        onClick={(event) => confirmDelete(event, batch.id)}
+                      />
+                    </div>
+                  }
+                  title={batch.name}
+                  key={batch.id}
+                >
+                  <div className="flex flex-column gap-4">
+                    <p className="m-0">Click me to edit</p>
+                    <ProgressBar
+                      value={100}
+                      style={{ height: "1rem" }}
+                    ></ProgressBar>
+                  </div>
+                </Card>
+              ))}
             </div>
-          </Card>
-        ))}
+          </>
+        )}
       </div>
     </>
   );
