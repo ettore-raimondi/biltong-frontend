@@ -35,7 +35,7 @@ function HomeContent() {
     {
       enabled: Boolean(activeBatch?.id),
       refetchInterval: 2000,
-    }
+    },
   );
 
   function getTitle({ name, isLoading }: { name: string; isLoading: boolean }) {
@@ -65,7 +65,7 @@ function HomeContent() {
 
   const confirmDelete = (
     event: React.MouseEvent<HTMLButtonElement>,
-    id: number
+    id: number,
   ) => {
     confirmPopup({
       target: event.currentTarget,
@@ -101,6 +101,7 @@ function HomeContent() {
   return (
     <>
       <div>
+        <ConfirmPopup />
         {!activeBatch ? (
           <Card className="m-5 p-5 text-center">
             <h2>No Batches Running</h2>
@@ -114,7 +115,6 @@ function HomeContent() {
           <>
             <p>Running batch</p>
             <div className="flex-grid m-5">
-              <ConfirmPopup />
               {activeBatch && (
                 <Card
                   className="item batch-card"
