@@ -34,7 +34,7 @@ export function CreateBatchDialog({
   });
 
   const [weight, setWeight] = useState<(number | null)[]>(
-    Array.from({ length: 9 }, () => 0)
+    Array.from({ length: 9 }, () => 0),
   );
   const [humidity, setHumidity] = useState<number | null>(0);
   const [temperature, setTemperature] = useState<number | null>(0);
@@ -46,6 +46,19 @@ export function CreateBatchDialog({
   const [customDryingParams, setCustomDryingParams] = useState<boolean>(false);
   const [selectedProfile, setSelectedProfile] =
     useState<DryingProfileConfig | null>(null);
+
+  function resetForm() {
+    setWeight(Array.from({ length: 9 }, () => 0));
+    setHumidity(0);
+    setTemperature(0);
+    setWeightLoss(0);
+    setAirflow(0);
+    setName("");
+    setMarinadeTime("");
+    setSeasoning("");
+    setCustomDryingParams(false);
+    setSelectedProfile(null);
+  }
 
   function setWeightAtIndex(index: number, value: number | null) {
     setWeight((prev) => {
@@ -79,6 +92,7 @@ export function CreateBatchDialog({
 
       // Data is valid, we can send it to API
       const result = await apiClient.post<Batch>("/batches", batch);
+      resetForm();
       onBatchCreated(result.data);
       toast.show("success", "Batch created successfully!");
     } catch (error) {
